@@ -1,0 +1,251 @@
+{
+  "name": "prayer-times-reminder",
+  "displayName": "Islamic Prayer Times",
+  "description": "Display Islamic prayer times with reminders and Adhan notifications",
+  "version": "1.1.1",
+  "publisher": "AhmedAlgzery",
+  "author": {
+    "name": "Ahmed Algzery"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ahmed-algzery/prayer-times-extension"
+  },
+  "homepage": "https://github.com/ahmed-algzery/prayer-times-extension#readme",
+  "bugs": {
+    "url": "https://github.com/ahmed-algzery/prayer-times-extension/issues"
+  },
+  "icon": "images/icon.png",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "prayer.showDetails",
+        "title": "Show Prayer Times"
+      }
+    ],
+    "configuration": {
+      "title": "Prayer Times",
+      "properties": {
+        "prayer.city": {
+          "type": "string",
+          "enum": [
+            "Cairo",
+            "Alexandria",
+            "Giza",
+            "Mecca",
+            "Medina",
+            "Riyadh",
+            "Jeddah",
+            "Istanbul",
+            "Ankara",
+            "Jakarta",
+            "Bandung",
+            "Karachi",
+            "Lahore",
+            "Islamabad",
+            "Kuala Lumpur",
+            "Dubai",
+            "Abu Dhabi",
+            "London",
+            "New York",
+            "Los Angeles",
+            "Chicago",
+            "Toronto",
+            "Sydney",
+            "Melbourne",
+            "Paris",
+            "Berlin",
+            "Mumbai",
+            "Delhi",
+            "Dhaka",
+            "Casablanca",
+            "Rabat",
+            "Tunis",
+            "Algiers",
+            "Amman",
+            "Beirut",
+            "Damascus",
+            "Baghdad",
+            "Tehran",
+            "Doha",
+            "Kuwait City",
+            "Manama",
+            "Muscat",
+            "Sanaa"
+          ],
+          "enumDescriptions": [
+            "Cairo, Egypt",
+            "Alexandria, Egypt",
+            "Giza, Egypt",
+            "Mecca, Saudi Arabia",
+            "Medina, Saudi Arabia",
+            "Riyadh, Saudi Arabia",
+            "Jeddah, Saudi Arabia",
+            "Istanbul, Turkey",
+            "Ankara, Turkey",
+            "Jakarta, Indonesia",
+            "Bandung, Indonesia",
+            "Karachi, Pakistan",
+            "Lahore, Pakistan",
+            "Islamabad, Pakistan",
+            "Kuala Lumpur, Malaysia",
+            "Dubai, UAE",
+            "Abu Dhabi, UAE",
+            "London, UK",
+            "New York, USA",
+            "Los Angeles, USA",
+            "Chicago, USA",
+            "Toronto, Canada",
+            "Sydney, Australia",
+            "Melbourne, Australia",
+            "Paris, France",
+            "Berlin, Germany",
+            "Mumbai, India",
+            "Delhi, India",
+            "Dhaka, Bangladesh",
+            "Casablanca, Morocco",
+            "Rabat, Morocco",
+            "Tunis, Tunisia",
+            "Algiers, Algeria",
+            "Amman, Jordan",
+            "Beirut, Lebanon",
+            "Damascus, Syria",
+            "Baghdad, Iraq",
+            "Tehran, Iran",
+            "Doha, Qatar",
+            "Kuwait City, Kuwait",
+            "Manama, Bahrain",
+            "Muscat, Oman",
+            "Sanaa, Yemen"
+          ],
+          "default": "Cairo",
+          "description": "City for prayer times calculation"
+        },
+        "prayer.country": {
+          "type": "string",
+          "enum": [
+            "EG",
+            "SA",
+            "TR",
+            "ID",
+            "PK",
+            "MY",
+            "AE",
+            "GB",
+            "US",
+            "CA",
+            "AU",
+            "FR",
+            "DE",
+            "IN",
+            "BD",
+            "MA",
+            "TN",
+            "DZ",
+            "JO",
+            "LB",
+            "SY",
+            "IQ",
+            "IR",
+            "QA",
+            "KW",
+            "BH",
+            "OM",
+            "YE"
+          ],
+          "enumDescriptions": [
+            "Egypt",
+            "Saudi Arabia",
+            "Turkey",
+            "Indonesia",
+            "Pakistan",
+            "Malaysia",
+            "United Arab Emirates",
+            "United Kingdom",
+            "United States",
+            "Canada",
+            "Australia",
+            "France",
+            "Germany",
+            "India",
+            "Bangladesh",
+            "Morocco",
+            "Tunisia",
+            "Algeria",
+            "Jordan",
+            "Lebanon",
+            "Syria",
+            "Iraq",
+            "Iran",
+            "Qatar",
+            "Kuwait",
+            "Bahrain",
+            "Oman",
+            "Yemen"
+          ],
+          "default": "EG",
+          "description": "Country code (ISO 3166-1 alpha-2) for prayer times calculation"
+        },
+        "prayer.method": {
+          "type": "string",
+          "enum": [
+            "Egyptian",
+            "UmmAlQura",
+            "MWL",
+            "MuslimWorldLeague",
+            "ISNA",
+            "NorthAmerica",
+            "Karachi",
+            "Tehran",
+            "Dubai",
+            "Kuwait",
+            "Qatar",
+            "Singapore",
+            "Turkey",
+            "MoonsightingCommittee"
+          ],
+          "default": "Egyptian",
+          "description": "Calculation method for prayer times"
+        },
+        "prayer.reminderMinutes": {
+          "type": "number",
+          "default": 15,
+          "minimum": 0,
+          "maximum": 60,
+          "description": "Minutes before prayer time to show reminder notification"
+        },
+        "prayer.enableAdhan": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable Adhan sound at prayer time"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "convert-icon": "node scripts/convert-icon.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.74.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "adhan": "^4.0.0",
+    "sharp": "^0.34.5"
+  }
+}
