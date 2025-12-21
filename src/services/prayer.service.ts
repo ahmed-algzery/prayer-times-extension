@@ -109,12 +109,12 @@ export class PrayerService {
     formatted: string;
   } {
     const diffMs = targetDate.getTime() - currentDate.getTime();
-    const totalSeconds = Math.max(0, Math.floor(diffMs / 1000));
+    const totalSeconds = Math.floor(diffMs / 1000);
     const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
+    const seconds = Math.abs(totalSeconds % 60);
     
     // Format as minutes only (e.g., "23 min")
-    const formatted = `${minutes} min`;
+    const formatted = totalSeconds >= 0 ? `${minutes} min` : `${Math.abs(minutes)} min ago`;
     
     return {
       totalSeconds,

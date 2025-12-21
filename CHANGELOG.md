@@ -2,9 +2,21 @@
 
 All notable changes to the "Islamic Prayer Times" extension will be documented in this file.
 
+## [1.1.2] - 2025-12-21
+
+### Fixed
+
+- **Critical Bug:** Adhan (azan) now plays correctly at prayer time
+  - Fixed exact-second matching issue that prevented azan from triggering (changed to 1-minute window)
+  - Fixed flag management bug that caused state tracking issues when enabling/disabling adhan
+  - Fixed reset logic that prevented subsequent prayers from triggering notifications
+  - Removed time calculation constraint that prevented proper prayer time detection
+- Improved reliability of prayer time notifications
+
 ## [1.1.0] - 2025-12-15
 
 ### Added
+
 - Enhanced notifications with emoji and better formatting
 - Prayer time arrival notifications
 - City and country dropdown lists in settings (43 cities, 28 countries)
@@ -13,6 +25,7 @@ All notable changes to the "Islamic Prayer Times" extension will be documented i
 - Improved error handling for audio playback
 
 ### Improved
+
 - Notification messages now show: "🕌 Prayer Reminder: {Prayer} in X minutes"
 - Prayer time notification: "🕌 {Prayer} time has arrived!"
 - Better Adhan audio error handling and user feedback
@@ -21,12 +34,14 @@ All notable changes to the "Islamic Prayer Times" extension will be documented i
 - Status bar shows "🕌 {Prayer} now" when prayer time arrives
 
 ### Changed
+
 - City and country settings now use dropdown lists instead of free text input
 - Each city/country option includes descriptive text (e.g., "Cairo, Egypt")
 
 ## [1.0.0] - 2025-12-15
 
 ### Added
+
 - Initial release of Islamic Prayer Times extension
 - Display prayer times (Fajr, Dhuhr, Asr, Maghrib, Isha) in VS Code status bar
 - Real-time countdown to next prayer (minutes only format)
@@ -57,9 +72,9 @@ All notable changes to the "Islamic Prayer Times" extension will be documented i
 - Automatic configuration change detection and service restart
 
 ### Technical Details
+
 - Built with TypeScript
 - Uses adhan library for prayer time calculations
 - Cross-platform audio playback (Windows, macOS, Linux)
 - Proper resource cleanup on deactivation
 - Extension activates on `onStartupFinished` to avoid blocking VS Code startup
-

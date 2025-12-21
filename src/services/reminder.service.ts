@@ -91,9 +91,10 @@ export class ReminderService {
         }
       }
       
-      // Show notification at prayer time
-      if (remaining.totalSeconds === 0 && remaining.minutes === 0) {
-        // Prayer time has arrived
+      // Check if prayer time has arrived (within 1 minute window)
+      // Since we check every 60 seconds, we need a window rather than exact match
+      if (remaining.totalSeconds <= 60 && remaining.minutes === 0) {
+        // Prayer time has arrived (or will arrive within the next minute)
         if (this.lastAdhanPrayer !== nextPrayer.name) {
           const prayerMessage = `🕌 ${nextPrayer.displayName} time has arrived!`;
           vscode.window.showInformationMessage(prayerMessage);
@@ -101,13 +102,20 @@ export class ReminderService {
           // Play Adhan if enabled
           if (this.enableAdhan) {
             playAdhan(this.extensionPath);
-            this.lastAdhanPrayer = nextPrayer.name;
           }
+          
+          // Mark this prayer as notified (regardless of adhan setting)
+          this.lastAdhanPrayer = nextPrayer.name;
         }
       }
       
-      // Reset reminder flag when prayer time passes (after 1 minute)
-      if (remaining.totalSeconds < 0 && Math.abs(remaining.minutes) >= 1) {
+      // Reset flags when we move to a new prayer
+      // Check if the current next prayer is different from what we last notified
+      const allPrayers = this.prayerService.getAllPrayerTimes(now);
+      const currentPrayerIndex = allPrayers.findIndex(p => p.name === nextPrayer.name);
+      
+      // If we've moved to a different prayer, reset flags
+      if (this.lastAdhanPrayer && this.lastAdhanPrayer !== nextPrayer.name) {
         this.lastReminderPrayer = null;
         this.lastAdhanPrayer = null;
       }
