@@ -11,6 +11,8 @@ export class ReminderService {
   private updateInterval: NodeJS.Timeout | undefined;
   private lastReminderPrayer: string | null = null;
   private lastAdhanPrayer: string | null = null;
+  private nextFollowUpTime: Date | null = null;
+  private followUpPrayerName: string | null = null;
   private extensionPath: string;
 
   constructor(
@@ -106,7 +108,32 @@ export class ReminderService {
           
           // Mark this prayer as notified (regardless of adhan setting)
           this.lastAdhanPrayer = nextPrayer.name;
+          
+          // Schedule follow-up in 20 minutes
+          this.nextFollowUpTime = new Date(Date.now() + 20 * 60 * 1000);
+          this.followUpPrayerName = nextPrayer.displayName;
         }
+      }
+
+      // Check for follow-up
+      if (this.nextFollowUpTime && now >= this.nextFollowUpTime) {
+        const prayerName = this.followUpPrayerName;
+        // Reset immediately to avoid repeated triggers
+        this.nextFollowUpTime = null;
+        
+        vscode.window.showInformationMessage(
+          `Did you pray ${prayerName}?`,
+          'Yes',
+          'No'
+        ).then(selection => {
+          if (selection === 'No') {
+            // Ask again in 20 minutes
+            this.nextFollowUpTime = new Date(Date.now() + 20 * 60 * 1000);
+          } else if (selection === 'Yes') {
+            // Done
+            this.followUpPrayerName = null;
+          }
+        });
       }
       
       // Reset flags when we move to a new prayer

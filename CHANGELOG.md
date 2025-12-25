@@ -2,6 +2,12 @@
 
 All notable changes to the "prayer-times" extension will be documented in this file.
 
+## [1.3.0]
+
+- Added "Did you pray?" follow-up notification 20 minutes after prayer time.
+- Interactive "Yes/No" response for follow-up.
+- Reschedules follow-up if user hasn't prayed yet.
+
 ## [1.2.0]
 
 - Added support for **250+ countries** and **150,000+ cities** worldwide.
