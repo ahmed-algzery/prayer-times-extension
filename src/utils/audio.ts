@@ -22,15 +22,16 @@ export function playAdhan(extensionPath: string): void {
   let command: string;
   
   if (platform === 'win32') {
-    // Windows: Use PowerShell SoundPlayer (escape path for PowerShell)
+    // Windows: Use PowerShell with Media.MediaPlayer for MP3 support
+    // System.Media.SoundPlayer only supports WAV
     const escapedPath = adhanPath.replace(/'/g, "''");
-    command = `powershell -Command "(New-Object Media.SoundPlayer '${escapedPath}').PlaySync();"`;
+    command = `powershell -Command "$player = New-Object -ComObject WMPlayer.OCX; $player.URL = '${escapedPath}'; $player.controls.play(); while ($player.playState -eq 3) { Start-Sleep -Milliseconds 100 }"`;
   } else if (platform === 'darwin') {
     // macOS: Use afplay
     command = `afplay "${adhanPath}"`;
   } else if (platform === 'linux') {
-    // Linux: Try paplay first (PulseAudio), then aplay (ALSA)
-    command = `paplay "${adhanPath}" 2>/dev/null || aplay "${adhanPath}" 2>/dev/null || echo "Audio playback failed"`;
+    // Linux: Try mpg123, ffplay, paplay, then aplay
+    command = `mpg123 "${adhanPath}" 2>/dev/null || ffplay -nodisp -autoexit "${adhanPath}" 2>/dev/null || paplay "${adhanPath}" 2>/dev/null || aplay "${adhanPath}" 2>/dev/null || echo "Audio playback failed"`;
   } else {
     vscode.window.showWarningMessage(`Adhan playback not supported on platform: ${platform}`);
     return;

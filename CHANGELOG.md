@@ -2,6 +2,11 @@
 
 All notable changes to the "prayer-times" extension will be documented in this file.
 
+## [1.3.1] - 2026-01-01
+
+- Fixed Azan audio playback on Windows (switched to WMPlayer.OCX for MP3 support).
+- Improved Linux audio playback support (added mpg123 and ffplay fallbacks).
+
 ## [1.3.0] - 2025-12-28
 
 - Added "Did you pray?" follow-up notification 20 minutes after prayer time.
