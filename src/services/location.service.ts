@@ -1,12 +1,22 @@
+import * as vscode from "vscode";
 import {
   getCountries,
   getCountryByCode,
   getStatesOfCountry,
   getAllCitiesOfCountry,
   getCitiesOfState,
-  searchCitiesByName
-} from '@countrystatecity/countries';
-import { Coordinates } from '../types';
+  searchCitiesByName,
+} from "@countrystatecity/countries";
+import { Coordinates } from "../types";
+
+/**
+ * Interface for city objects from the country-state-city library
+ */
+interface ICity {
+  name: string;
+  latitude: string | null;
+  longitude: string | null;
+}
 
 /**
  * Location service for managing country, state, and city data
@@ -63,7 +73,10 @@ export class LocationService {
    * @param countryCode ISO 3166-1 alpha-2 country code
    * @returns Promise of coordinates object with latitude and longitude, or Cairo as fallback
    */
-  static async getCoordinates(cityName: string, countryCode: string): Promise<Coordinates> {
+  static async getCoordinates(
+    cityName: string,
+    countryCode: string
+  ): Promise<Coordinates> {
     const normalizedCityName = cityName.trim();
     const normalizedCountryCode = countryCode.trim().toUpperCase();
 
@@ -72,14 +85,22 @@ export class LocationService {
       const cities = await this.getCitiesOfCountry(normalizedCountryCode);
 
       // Find the city by name (case-insensitive)
-      const city = cities.find(
-        (c: any) => c.name.toLowerCase() === normalizedCityName.toLowerCase()
+      // First try exact match, then try startsWith for cities with sub-regions
+      let city = cities.find(
+        (c: ICity) => c.name.toLowerCase() === normalizedCityName.toLowerCase()
       );
+
+      // If no exact match, try to find a city that starts with the search term
+      if (!city) {
+        city = cities.find((c: ICity) =>
+          c.name.toLowerCase().startsWith(normalizedCityName.toLowerCase())
+        );
+      }
 
       if (city && city.latitude && city.longitude) {
         return {
           latitude: parseFloat(city.latitude),
-          longitude: parseFloat(city.longitude)
+          longitude: parseFloat(city.longitude),
         };
       }
     } catch (error) {
@@ -87,10 +108,13 @@ export class LocationService {
     }
 
     // Fallback to Cairo coordinates
-    console.warn(`City "${cityName}" not found in country "${countryCode}". Using Cairo as fallback.`);
+    vscode.window.showWarningMessage(
+      `City "${cityName}" not found in country "${countryCode}". Using Cairo as fallback.`
+    );
+
     return {
       latitude: 30.0444,
-      longitude: 31.2357
+      longitude: 31.2357,
     };
   }
 
@@ -102,8 +126,17 @@ export class LocationService {
    * @param limit Maximum number of results to return
    * @returns Promise of array of cities matching the search
    */
-  static async searchCities(searchTerm: string, countryCode: string = '', stateCode: string = '', limit: number = 10) {
-    const results = await searchCitiesByName(countryCode, stateCode, searchTerm);
+  static async searchCities(
+    searchTerm: string,
+    countryCode: string = "",
+    stateCode: string = "",
+    limit: number = 10
+  ) {
+    const results = await searchCitiesByName(
+      countryCode,
+      stateCode,
+      searchTerm
+    );
     return results.slice(0, limit);
   }
 }

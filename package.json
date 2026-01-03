@@ -229,6 +229,15 @@
           "type": "boolean",
           "default": true,
           "description": "Enable or disable Adhan sound at prayer time"
+        },
+        "prayer.timeFormat": {
+          "type": "string",
+          "enum": [
+            "12h",
+            "24h"
+          ],
+          "default": "12h",
+          "description": "Time format for displaying prayer times (12-hour or 24-hour)"
         }
       }
     }
