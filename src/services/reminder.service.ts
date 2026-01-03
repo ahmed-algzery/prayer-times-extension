@@ -1,7 +1,10 @@
-import * as vscode from 'vscode';
-import { PrayerService } from './prayer.service';
-import { PrayerInfo } from '../types';
-import { playAdhan } from '../utils/audio';
+import * as vscode from "vscode";
+import { PrayerService } from "./prayer.service";
+import { PrayerInfo } from "../types";
+import { playAdhan } from "../utils/audio";
+import { formatDate, formatTime } from "../utils/helper";
+
+let currentTimeFormat: "12h" | "24h" = "12h";
 
 export class ReminderService {
   private prayerService: PrayerService;
@@ -25,16 +28,16 @@ export class ReminderService {
     this.reminderMinutes = reminderMinutes;
     this.enableAdhan = enableAdhan;
     this.extensionPath = extensionPath;
-    
+
     // Create status bar item
     this.statusBarItem = vscode.window.createStatusBarItem(
       vscode.StatusBarAlignment.Right,
       100
     );
-    this.statusBarItem.command = 'prayer.showDetails';
-    this.statusBarItem.tooltip = 'Click to view all prayer times';
+    this.statusBarItem.command = "prayer.showDetails";
+    this.statusBarItem.tooltip = "Click to view all prayer times";
     this.statusBarItem.show();
-    
+
     // Start updating
     this.start();
   }
@@ -45,7 +48,7 @@ export class ReminderService {
   private start(): void {
     // Update immediately
     this.updateStatusBar();
-    
+
     // Update every minute (60000 ms)
     this.updateInterval = setInterval(() => {
       this.updateStatusBar();
@@ -60,17 +63,26 @@ export class ReminderService {
     try {
       const now = new Date();
       const nextPrayer = this.prayerService.getNextPrayer(now);
-      const remaining = this.prayerService.getRemainingTime(nextPrayer.time, now);
-      
+      const remaining = this.prayerService.getRemainingTime(
+        nextPrayer.time,
+        now
+      );
+
+      const config = vscode.workspace.getConfiguration("prayer");
+      currentTimeFormat = config.get<"12h" | "24h">("timeFormat", "12h");
+
       if (remaining.totalSeconds > 0) {
-        this.statusBarItem.text = `⏰ ${nextPrayer.displayName} in ${remaining.formatted}`;
+        this.statusBarItem.text = `⏰ ${nextPrayer.displayName} at ${formatTime(
+          nextPrayer.time,
+          currentTimeFormat
+        )}`;
       } else {
         // Prayer time has arrived
         this.statusBarItem.text = `🕌 ${nextPrayer.displayName} now`;
       }
     } catch (error) {
-      this.statusBarItem.text = '⏰ Prayer Times';
-      console.error('Error updating status bar:', error);
+      this.statusBarItem.text = "⏰ Prayer Times";
+      console.error("Error updating status bar:", error);
     }
   }
 
@@ -81,18 +93,28 @@ export class ReminderService {
     try {
       const now = new Date();
       const nextPrayer = this.prayerService.getNextPrayer(now);
-      const remaining = this.prayerService.getRemainingTime(nextPrayer.time, now);
-      
+      const remaining = this.prayerService.getRemainingTime(
+        nextPrayer.time,
+        now
+      );
+
       // Check if we're at the reminder threshold
-      if (remaining.minutes === this.reminderMinutes && remaining.seconds < 60) {
+      if (
+        remaining.minutes === this.reminderMinutes &&
+        remaining.seconds < 60
+      ) {
         // Only show reminder once per prayer
         if (this.lastReminderPrayer !== nextPrayer.name) {
-          const reminderMessage = `🕌 Prayer Reminder: ${nextPrayer.displayName} in ${this.reminderMinutes} minute${this.reminderMinutes !== 1 ? 's' : ''}`;
+          const reminderMessage = `🕌 Prayer Reminder: ${
+            nextPrayer.displayName
+          } in ${this.reminderMinutes} minute${
+            this.reminderMinutes !== 1 ? "s" : ""
+          }`;
           vscode.window.showInformationMessage(reminderMessage);
           this.lastReminderPrayer = nextPrayer.name;
         }
       }
-      
+
       // Check if prayer time has arrived (within 1 minute window)
       // Since we check every 60 seconds, we need a window rather than exact match
       if (remaining.totalSeconds <= 60 && remaining.minutes === 0) {
@@ -100,15 +122,15 @@ export class ReminderService {
         if (this.lastAdhanPrayer !== nextPrayer.name) {
           const prayerMessage = `🕌 ${nextPrayer.displayName} time has arrived!`;
           vscode.window.showInformationMessage(prayerMessage);
-          
+
           // Play Adhan if enabled
           if (this.enableAdhan) {
             playAdhan(this.extensionPath);
           }
-          
+
           // Mark this prayer as notified (regardless of adhan setting)
           this.lastAdhanPrayer = nextPrayer.name;
-          
+
           // Schedule follow-up in 20 minutes
           this.nextFollowUpTime = new Date(Date.now() + 20 * 60 * 1000);
           this.followUpPrayerName = nextPrayer.displayName;
@@ -120,34 +142,34 @@ export class ReminderService {
         const prayerName = this.followUpPrayerName;
         // Reset immediately to avoid repeated triggers
         this.nextFollowUpTime = null;
-        
-        vscode.window.showInformationMessage(
-          `Did you pray ${prayerName}?`,
-          'Yes',
-          'No'
-        ).then(selection => {
-          if (selection === 'No') {
-            // Ask again in 20 minutes
-            this.nextFollowUpTime = new Date(Date.now() + 20 * 60 * 1000);
-          } else if (selection === 'Yes') {
-            // Done
-            this.followUpPrayerName = null;
-          }
-        });
+
+        vscode.window
+          .showInformationMessage(`Did you pray ${prayerName}?`, "Yes", "No")
+          .then((selection) => {
+            if (selection === "No") {
+              // Ask again in 20 minutes
+              this.nextFollowUpTime = new Date(Date.now() + 20 * 60 * 1000);
+            } else if (selection === "Yes") {
+              // Done
+              this.followUpPrayerName = null;
+            }
+          });
       }
-      
+
       // Reset flags when we move to a new prayer
       // Check if the current next prayer is different from what we last notified
       const allPrayers = this.prayerService.getAllPrayerTimes(now);
-      const currentPrayerIndex = allPrayers.findIndex(p => p.name === nextPrayer.name);
-      
+      const currentPrayerIndex = allPrayers.findIndex(
+        (p) => p.name === nextPrayer.name
+      );
+
       // If we've moved to a different prayer, reset flags
       if (this.lastAdhanPrayer && this.lastAdhanPrayer !== nextPrayer.name) {
         this.lastReminderPrayer = null;
         this.lastAdhanPrayer = null;
       }
     } catch (error) {
-      console.error('Error checking reminders:', error);
+      console.error("Error checking reminders:", error);
     }
   }
 
@@ -178,7 +200,9 @@ export class ReminderService {
   /**
    * Get remaining time until next prayer
    */
-  public getRemainingTime(): ReturnType<typeof this.prayerService.getRemainingTime> {
+  public getRemainingTime(): ReturnType<
+    typeof this.prayerService.getRemainingTime
+  > {
     const now = new Date();
     const nextPrayer = this.prayerService.getNextPrayer(now);
     return this.prayerService.getRemainingTime(nextPrayer.time, now);
@@ -195,4 +219,3 @@ export class ReminderService {
     this.statusBarItem.dispose();
   }
 }
-
